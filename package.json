@@ -1,0 +1,21 @@
+{
+  "name": "pdf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "make_grammar": "nearleyc grammar/pdf_grammar.ne -o grammar/pdf_grammar.js",
+    "make_grammar_test": "nearleyc grammar/pdf_grammar_values_testable.ne -o test/grammar/pdf_grammar_values_testable.js",
+    "test_grammar": "npm run make_grammar && npm run make_grammar_test && mocha",
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nearley": "^2.20.1"
+  }
+}
