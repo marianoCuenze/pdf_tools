@@ -1,3 +1,3 @@
 @include "./pdf_grammar_values.ne"
 
-pdf                     -> pdf_value
+pdf                     -> pdf_value    {% id %}

@@ -27,7 +27,6 @@ function parse_pdf_values(pdf_string) {
     pdf_parser.feed(pdf_string)
     return pdf_parser.results
 }
-
 describe('PDF', function () {
     describe('::GRAMMAR', function () {
         describe('::values', function () {
@@ -101,7 +100,7 @@ describe('PDF', function () {
                 });
             });
 
-            describe('#hexa strings', function () {
+            describe('#text strings', function () {
                 it('should parse pdf text strings: 1 char', function () {
                 const results = parse_pdf_values("(a)")
 
@@ -163,6 +162,18 @@ describe('PDF', function () {
                     console.log(JSON.stringify(results))
                     assert.equal(results.length, 1);
                 });
+                it('should parse pdf array: 1 item', function () {
+                    const results = parse_pdf_values("[1]")
+
+                    console.log(JSON.stringify(results))
+                    assert.equal(results.length, 1);
+                });
+                it('should parse pdf array: 1 item', function () {
+                    const results = parse_pdf_values("[1 2 3]")
+
+                    console.log(JSON.stringify(results))
+                    assert.equal(results.length, 1);
+                });
                 it('should parse pdf array: N item', function () {
                     const results = parse_pdf_values("[ null true (1) [false]]")
 
@@ -211,7 +222,7 @@ describe('PDF', function () {
                     assert.equal(results.length, 1);
                 });
                 it('should parse pdf object: with arr', function () {
-                    const results = parse_pdf_values("0 0 obj [ (a) ] endobj")
+                    const results = parse_pdf_values("10 2 obj [ (a) ] endobj")
 
                     console.log(JSON.stringify(results))
                     assert.equal(results.length, 1);

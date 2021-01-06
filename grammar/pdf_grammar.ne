@@ -5,7 +5,7 @@ pdf                     -> pdf_header   spaces:?
                            pdf_xtable   spaces:?        #TODO: HANDLE incremental updates
                            pdf_trailer
 
-pdf_header              -> "%PDF-1.0"
+pdf_header              -> "%PDF-1.0"           {% id %}
 
 pdf_body                -> pdf_objs
 ##                      |  pdf_comment
