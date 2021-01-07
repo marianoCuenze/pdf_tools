@@ -135,30 +135,69 @@ var grammar = {
     {"name": "pdf$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "pdf$ebnf$3", "symbols": ["spaces"], "postprocess": id},
     {"name": "pdf$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "pdf", "symbols": ["pdf_header", "pdf$ebnf$1", "pdf_body", "pdf$ebnf$2", "pdf_xtable", "pdf$ebnf$3", "pdf_trailer"]},
+    {"name": "pdf", "symbols": ["pdf_header", "pdf$ebnf$1", "pdf_body", "pdf$ebnf$2", "pdf_xtable", "pdf$ebnf$3", "pdf_trailer"], "postprocess":  function(data) {
+            return {
+                header: data[0],
+                body: data[2],
+                xtable: data[4],
+                trailer: data[6]
+            }
+        }
+                                                                 },
     {"name": "pdf_header$string$1", "symbols": [{"literal":"%"}, {"literal":"P"}, {"literal":"D"}, {"literal":"F"}, {"literal":"-"}, {"literal":"1"}, {"literal":"."}, {"literal":"0"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "pdf_header", "symbols": ["pdf_header$string$1"]},
-    {"name": "pdf_body", "symbols": ["pdf_objs"]},
+    {"name": "pdf_header", "symbols": ["pdf_header$string$1"], "postprocess": id},
+    {"name": "pdf_body", "symbols": ["pdf_objs"], "postprocess": id},
     {"name": "pdf_xtable$ebnf$1", "symbols": ["pdf_xtable_section"]},
     {"name": "pdf_xtable$ebnf$1", "symbols": ["pdf_xtable$ebnf$1", "pdf_xtable_section"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "pdf_xtable", "symbols": ["pdf_xtable$ebnf$1"]},
+    {"name": "pdf_xtable", "symbols": ["pdf_xtable$ebnf$1"], "postprocess":  function(data) {
+               return {
+                   sections: data[0]
+               }
+        } },
     {"name": "pdf_xtable_section$string$1", "symbols": [{"literal":"x"}, {"literal":"r"}, {"literal":"e"}, {"literal":"f"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "pdf_xtable_section$ebnf$1", "symbols": ["pdf_xtable_subsection"]},
     {"name": "pdf_xtable_section$ebnf$1", "symbols": ["pdf_xtable_section$ebnf$1", "pdf_xtable_subsection"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "pdf_xtable_section", "symbols": ["pdf_xtable_section$string$1", "spaces", "pdf_xtable_section$ebnf$1"]},
-    {"name": "pdf_xtable_subsection", "symbols": ["pdf_num_int", "spaces", "pdf_num_int", "spaces", "pdf_xtable_entries"]},
-    {"name": "pdf_xtable_entries", "symbols": ["pdf_xtable_entry"]},
-    {"name": "pdf_xtable_entries", "symbols": ["pdf_xtable_entries", "pdf_xtable_entry"]},
-    {"name": "pdf_xtable_entry", "symbols": ["pdf_10_digits", {"literal":" "}, "pdf_5_digits", {"literal":" "}, {"literal":"n"}, "end_of_line"]},
-    {"name": "pdf_xtable_entry", "symbols": ["pdf_10_digits", {"literal":" "}, "pdf_5_digits", {"literal":" "}, {"literal":"f"}, "spaces"]},
-    {"name": "pdf_10_digits", "symbols": ["digit", "digit", "digit", "digit", "digit", "digit", "digit", "digit", "digit", "digit"]},
-    {"name": "pdf_5_digits", "symbols": ["digit", "digit", "digit", "digit", "digit"]},
+    {"name": "pdf_xtable_section", "symbols": ["pdf_xtable_section$string$1", "spaces", "pdf_xtable_section$ebnf$1"], "postprocess":  function(data) {
+               return {
+                   subsections: data[2]
+               }
+        } },
+    {"name": "pdf_xtable_subsection", "symbols": ["pdf_num_int", "spaces", "pdf_num_int", "spaces", "pdf_xtable_entries"], "postprocess":  function(data) {
+            return {
+                "initial_obj_num": data[0],
+                "amount_of_obj_num": data[2],
+                "entries": data[4]
+            }
+        }},
+    {"name": "pdf_xtable_entries", "symbols": ["pdf_xtable_entry"], "postprocess": function(data) {  return [ data[0] ] }},
+    {"name": "pdf_xtable_entries", "symbols": ["pdf_xtable_entries", "pdf_xtable_entry"], "postprocess": function(data) {  return data[0].concat( data[1] ); }},
+    {"name": "pdf_xtable_entry", "symbols": ["pdf_10_digits", {"literal":" "}, "pdf_5_digits", {"literal":" "}, /[nf]/, "end_of_line"], "postprocess":  function(data) {
+            return Object.assign(
+            {
+                "t":data[4],
+                gen_num:data[2]
+            },
+              (data[4] == 'n') ?
+                {bit_off:data[0]}
+                :
+                {next_free_obj:data[0]}
+            );
+        }
+                                                                                                },
+    {"name": "pdf_10_digits", "symbols": ["digit", "digit", "digit", "digit", "digit", "digit", "digit", "digit", "digit", "digit"], "postprocess": function(data) { return data.join('') }},
+    {"name": "pdf_5_digits", "symbols": ["digit", "digit", "digit", "digit", "digit"], "postprocess": function(data) { return data.join('') }},
     {"name": "pdf_trailer$string$1", "symbols": [{"literal":"t"}, {"literal":"r"}, {"literal":"a"}, {"literal":"i"}, {"literal":"l"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "pdf_trailer$string$2", "symbols": [{"literal":"s"}, {"literal":"t"}, {"literal":"a"}, {"literal":"r"}, {"literal":"t"}, {"literal":"x"}, {"literal":"r"}, {"literal":"e"}, {"literal":"f"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "pdf_trailer$string$3", "symbols": [{"literal":"%"}, {"literal":"%"}, {"literal":"E"}, {"literal":"O"}, {"literal":"F"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "pdf_trailer", "symbols": ["pdf_trailer$string$1", "spaces", "pdf_dict", "spaces", "pdf_trailer$string$2", "spaces", "pdf_num_int", "spaces", "pdf_trailer$string$3"]},
-    {"name": "pdf_objs", "symbols": ["pdf_obj"]},
-    {"name": "pdf_objs", "symbols": ["pdf_objs", "spaces", "pdf_obj"]}
+    {"name": "pdf_trailer", "symbols": ["pdf_trailer$string$1", "spaces", "pdf_dict", "spaces", "pdf_trailer$string$2", "spaces", "pdf_num_int", "spaces", "pdf_trailer$string$3"], "postprocess":  function(data) {
+            return {
+                dict: data[2],
+                startxref: data[6]
+            }
+        }
+                                                                                 },
+    {"name": "pdf_objs", "symbols": ["pdf_obj"], "postprocess": function(data) {  return [ data[0] ] }},
+    {"name": "pdf_objs", "symbols": ["pdf_objs", "spaces", "pdf_obj"], "postprocess": function(data) {  return data[0].concat( data[2] ); }}
 ]
   , ParserStart: "pdf"
 }
